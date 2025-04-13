@@ -252,3 +252,69 @@ VALUES (1, '2025-04-02', 2),
  GRANT ALL PRIVILEGES ON BookstoreDB.* TO 'store_manager'@'localhost';
  GRANT INSERT, UPDATE ON BookstoreDB.* TO 'data_entry'@'localhost';
  GRANT SELECT ON BookstoreDB.* TO 'read_only_user'@'localhost';
+
+ -- TESTING THE DATABASE
+ -- 1. Find the Most Expensive Books
+ SELECT title, genre, price
+FROM book
+ORDER BY price DESC
+LIMIT 5;
+
+-- 2. List All Books by a Specific Author
+SELECT b.title, b.genre, b.price
+FROM book b
+JOIN book_author ba ON b.book_id = ba.book_id
+JOIN author a ON ba.author_id = a.author_id
+WHERE a.first_name = 'J.K.' AND a.last_name = 'Rowling';
+
+-- 3. Count Books per Genre
+SELECT genre, COUNT(*) AS book_count
+FROM book
+GROUP BY genre;
+
+-- 4. Find Customers with Multiple Addresses
+SELECT c.first_name, c.last_name, COUNT(ca.address_id) AS address_count
+FROM customer c
+JOIN customer_address ca ON c.customer_id = ca.customer_id
+GROUP BY c.customer_id
+HAVING address_count > 1;
+
+-- 5. View Orders Placed by Each Customer
+SELECT c.first_name, c.last_name, co.order_id, co.order_date, os.status_name
+FROM customer c
+JOIN cust_order co ON c.customer_id = co.customer_id
+JOIN order_status os ON co.order_status_id = os.order_status_id;
+
+-- 6. Check Sales per Shipping Method
+SELECT sm.method_name, SUM(b.price * ol.quantity) AS total_sales
+FROM shipping_method sm
+JOIN cust_order co ON sm.shipping_method_id = co.shipping_method_id
+JOIN order_line ol ON co.order_id = ol.order_id
+JOIN book b ON ol.book_id = b.book_id
+GROUP BY sm.method_name;
+
+-- 7. Find the Most Popular Books
+SELECT b.title, COUNT(ol.book_id) AS order_count
+FROM book b
+JOIN order_line ol ON b.book_id = ol.book_id
+GROUP BY b.title
+ORDER BY order_count DESC
+LIMIT 5;
+
+-- 8. Identify Customers with Pending Orders
+SELECT c.first_name, c.last_name, co.order_id, os.status_name
+FROM customer c
+JOIN cust_order co ON c.customer_id = co.customer_id
+JOIN order_status os ON co.order_status_id = os.order_status_id
+WHERE os.status_name = 'Pending';
+
+--  9. Analyze Revenue Generated
+SELECT SUM(b.price * ol.quantity) AS total_revenue
+FROM book b
+JOIN order_line ol ON b.book_id = ol.book_id;
+
+-- 10. View the Order History
+SELECT oh.order_id, os.status_name, oh.status_change_date
+FROM order_history oh
+JOIN order_status os ON oh.order_status_id = os.order_status_id
+ORDER BY oh.status_change_date;
