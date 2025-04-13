@@ -4,27 +4,6 @@ CREATE DATABASE BookstoreDB;
 -- Use the database
 USE BookstoreDB;
 
--- Creating a table to store a list of all books available in the store
-CREATE TABLE book (
-    book_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    genre VARCHAR(100),
-    price DECIMAL(10, 2),
-    language_id INT,
-    publisher_id INT,
-    FOREIGN KEY (language_id) REFERENCES book_language(language_id),
-    FOREIGN KEY (publisher_id) REFERENCES publisher(publisher_id)
-);
-
--- Creating a table to manage the many-to-many relationship between authors and books
-CREATE TABLE book_author (
-    book_id INT,
-    author_id INT,
-    PRIMARY KEY (book_id, author_id),
-    FOREIGN KEY (book_id) REFERENCES book(book_id),
-    FOREIGN KEY (author_id) REFERENCES author(author_id)
-);
-
 -- Creating a table to store a list of all the authors
 CREATE TABLE author (
     author_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -44,48 +23,25 @@ CREATE TABLE publisher (
     publisher_name VARCHAR(255) NOT NULL
 );
 
--- Creating a table to store the possible statuses for an order
-CREATE TABLE order_status(
-order_status_id INT AUTO_INCREMENT PRIMARY KEY,
-status_name VARCHAR (50) NOT NULL
+-- Creating a table to store a list of all books available in the store
+CREATE TABLE book (
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    genre VARCHAR(100),
+    price DECIMAL(10, 2),
+    language_id INT,
+    publisher_id INT,
+    FOREIGN KEY (language_id) REFERENCES book_language(language_id),
+    FOREIGN KEY (publisher_id) REFERENCES publisher(publisher_id)
 );
 
--- Creating a atable to contain the shipping methods
-CREATE TABLE shipping_method(
-shipping_method_id INT AUTO_INCREMENT PRIMARY KEY,
-method_name VARCHAR(100) NOT NULL
-);
-
--- Creating table to store list of customer orders
-CREATE TABLE cust_orders (
-order_id INT AUTO_INCREMENT PRIMARY KEY,
-customer_id INT,
-order_status_id INT,
-shipping_method_id INT,
-order_date DATE,
-FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
-FOREIGN KEY (order_status_id) REFERENCES order_status(order_status_id),
-FOREIGN KEY (shipping_method_id) REFERENCES shipping_method(shipping_method_id)
-);
-
--- Creating a table to list books that are part of each order
-CREATE TABLE order_line(
-order_line_id INT AUTO_INCREMENT PRIMARY KEY,
-order_id INT,
-book_id INT,
-quantity INT,
-FOREIGN KEY (order_id) REFERENCES cust_orders(order_id),
-FOREIGN KEY (book_id) REFERENCES book(book_id)
-);
-
--- Creating a table to store the history of an order
-CREATE TABLE order_history(
-history_id INT AUTO_INCREMENT PRIMARY KEY,
-order_id INT,
-status_change_date DATE,
-order_status_id int,
-FOREIGN KEY (order_id) REFERENCES cust_orders(order_id),
-FOREIGN KEY (order_status_id) REFERENCES order_status(order_status_id)
+-- Creating a table to manage the many-to-many relationship between authors and books
+CREATE TABLE book_author (
+    book_id INT,
+    author_id INT,
+    PRIMARY KEY (book_id, author_id),
+    FOREIGN KEY (book_id) REFERENCES book(book_id),
+    FOREIGN KEY (author_id) REFERENCES author(author_id)
 );
 
 -- Creating customer table 
@@ -132,6 +88,78 @@ CREATE TABLE customer_address (
     FOREIGN KEY (address_status_id) REFERENCES address_status(address_status_id)
 );
 
+-- Creating a table to store the possible statuses for an order
+CREATE TABLE order_status(
+order_status_id INT AUTO_INCREMENT PRIMARY KEY,
+status_name VARCHAR (50) NOT NULL
+);
+
+-- Creating a atable to contain the shipping methods
+CREATE TABLE shipping_method(
+shipping_method_id INT AUTO_INCREMENT PRIMARY KEY,
+method_name VARCHAR(100) NOT NULL
+);
+
+-- Creating table to store list of customer orders
+CREATE TABLE cust_order (
+order_id INT AUTO_INCREMENT PRIMARY KEY,
+customer_id INT,
+order_status_id INT,
+shipping_method_id INT,
+order_date DATE,
+FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
+FOREIGN KEY (order_status_id) REFERENCES order_status(order_status_id),
+FOREIGN KEY (shipping_method_id) REFERENCES shipping_method(shipping_method_id)
+);
+
+-- Creating a table to list books that are part of each order
+CREATE TABLE order_line(
+order_line_id INT AUTO_INCREMENT PRIMARY KEY,
+order_id INT,
+book_id INT,
+quantity INT,
+FOREIGN KEY (order_id) REFERENCES cust_order(order_id),
+FOREIGN KEY (book_id) REFERENCES book(book_id)
+);
+
+-- Creating a table to store the history of an order
+CREATE TABLE order_history(
+history_id INT AUTO_INCREMENT PRIMARY KEY,
+order_id INT,
+status_change_date DATE,
+order_status_id int,
+FOREIGN KEY (order_id) REFERENCES cust_order(order_id),
+FOREIGN KEY (order_status_id) REFERENCES order_status(order_status_id)
+);
+
+-- Inserting data into author table
+INSERT INTO author (first_name, last_name)
+VALUES
+    ('J.K.', 'Rowling'),
+    ('George', 'Orwell'),
+    ('Jane', 'Austen'),
+    ('Mark', 'Twain'),
+    ('Charles', 'Dickens');
+    
+-- Inserting data into book_language table
+INSERT INTO book_language (language_name)
+VALUES
+    ('English'),
+    ('Spanish'),
+    ('French'),
+    ('German'),
+    ('Japanese');
+    
+-- Inserting data into publisher table
+INSERT INTO publisher (publisher_name)
+VALUES
+    ('Penguin Random House'),
+    ('HarperCollins'),
+    ('Simon & Schuster'),
+    ('Macmillan'),
+    ('Hachette');
+
+
 -- Inserting data into book table
 INSERT INTO book (title, genre, price, language_id, publisher_id)
 VALUES
@@ -150,32 +178,13 @@ VALUES
     (4, 4),
     (5, 5);
 
--- Inserting data into author table
-INSERT INTO author (first_name, last_name)
-VALUES
-    ('J.K.', 'Rowling'),
-    ('George', 'Orwell'),
-    ('Jane', 'Austen'),
-    ('Mark', 'Twain'),
-    ('Charles', 'Dickens');
-
--- Inserting data into book_language table
-INSERT INTO book_language (language_name)
-VALUES
-    ('English'),
-    ('Spanish'),
-    ('French'),
-    ('German'),
-    ('Japanese');
-
--- Inserting data into publisher table
-INSERT INTO publisher (publisher_name)
-VALUES
-    ('Penguin Random House'),
-    ('HarperCollins'),
-    ('Simon & Schuster'),
-    ('Macmillan'),
-    ('Hachette');
+-- Insert into customer
+INSERT INTO customer (first_name, last_name, email, phone) VALUES
+('John', 'Doe', 'john@plp.com', '0700000001'),
+('Jane', 'Smith', 'jane@plp.com', '0700000002'),
+('Alice', 'Johnson', 'alice@plp.com', '0700000003'),
+('Bob', 'Brown', 'bob@plp.com', '0700000004'),
+('Charlie', 'Davis', 'charlie@plp.com', '0700000005');
 
 -- Insert into country
 INSERT INTO country (country_name) VALUES
@@ -185,13 +194,6 @@ INSERT INTO country (country_name) VALUES
 INSERT INTO address_status (status_name) VALUES
 ('Current'), ('Old'), ('Temporary'), ('Vacation'), ('Office');
 
--- Insert into customer
-INSERT INTO customer (first_name, last_name, email, phone) VALUES
-('John', 'Doe', 'john@plp.com', '0700000001'),
-('Jane', 'Smith', 'jane@plp.com', '0700000002'),
-('Alice', 'Johnson', 'alice@plp.com', '0700000003'),
-('Bob', 'Brown', 'bob@plp.com', '0700000004'),
-('Charlie', 'Davis', 'charlie@plp.com', '0700000005');
 
 -- Insert into address
 INSERT INTO address (street, city, state, postal_code, country_id) VALUES
@@ -208,3 +210,45 @@ INSERT INTO customer_address (customer_id, address_id, address_status_id) VALUES
 (3, 3, 2), -- Alice Johnson, old address
 (4, 4, 3), -- Bob Brown, temporary address
 (5, 5, 4); -- Charlie Davis, vacation address
+       
+
+-- inserting data into shipping_method
+INSERT INTO shipping_method (method_name)
+VALUES ('Standard Shipping'),
+       ('Express Shipping'),
+       ('Overnight Shipping');
+       
+-- Inserting data into order_status   
+INSERT INTO order_status (status_name)
+VALUES ('Pending'),
+       ('Shipped'),
+       ('Delivered'),
+       ('Cancelled');
+       
+-- Inserting data into cust_order
+INSERT INTO cust_order (customer_id, order_status_id, shipping_method_id, order_date)
+VALUES (1, 1, 1, '2025-04-01'),
+       (2, 2, 2, '2025-04-05'),
+       (3, 3, 3, '2025-04-10');
+       
+-- Inserting data into order_line
+INSERT INTO order_line (order_id, book_id, quantity)
+VALUES (1, 1, 2),
+       (1, 2, 1),
+       (2, 3, 5),
+       (3, 1, 3);
+       
+-- Inserting data into order_history
+INSERT INTO order_history (order_id, status_change_date, order_status_id)
+VALUES (1, '2025-04-02', 2),
+       (2, '2025-04-06', 3),
+       (3, '2025-04-11', 1);
+       
+       -- Managing Database Access
+ CREATE USER 'store_manager'@'localhost' IDENTIFIED BY 'password123';
+ CREATE USER 'data_entry'@'localhost' IDENTIFIED BY 'password123';
+ CREATE USER 'read_only_user'@'localhost' IDENTIFIED BY 'password123';
+
+ GRANT ALL PRIVILEGES ON BookstoreDB.* TO 'store_manager'@'localhost';
+ GRANT INSERT, UPDATE ON BookstoreDB.* TO 'data_entry'@'localhost';
+ GRANT SELECT ON BookstoreDB.* TO 'read_only_user'@'localhost';
